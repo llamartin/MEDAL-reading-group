@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading Group</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .session {
+            border-bottom: 1px solid #ddd;
+            padding: 20px 0;
+        }
+
+        .date {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+
+        .paper {
+            margin-bottom: 5px;
+        }
+
+        .presenter {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reading Group</h1>
+    
+    <div id="sessions"></div>
+
+    <script>
+        // Edit this list with your papers and presenters
+        const sessions = [
+            { paper: "Paper Title 1", presenter: "Name 1" },
+            { paper: "Paper Title 2", presenter: "Name 2" },
+            { paper: "Paper Title 3", presenter: "Name 3" },
+            { paper: "Paper Title 4", presenter: "Name 4" },
+            { paper: "Paper Title 5", presenter: "Name 5" },
+            { paper: "Paper Title 6", presenter: "Name 6" },
+            { paper: "Paper Title 7", presenter: "Name 7" },
+            { paper: "Paper Title 8", presenter: "Name 8" },
+            { paper: "Paper Title 9", presenter: "Name 9" },
+            { paper: "Paper Title 10", presenter: "Name 10" },
+            { paper: "Paper Title 11", presenter: "Name 11" },
+            { paper: "Paper Title 12", presenter: "Name 12" }
+        ];
+
+        function generateDates() {
+            const startDate = new Date('2025-08-04');
+            const container = document.getElementById('sessions');
+            
+            sessions.forEach((session, i) => {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + (i * 14));
+                
+                const sessionDiv = document.createElement('div');
+                sessionDiv.className = 'session';
+                sessionDiv.innerHTML = `
+                    <div class="date">${date.toLocaleDateString('en-AU', { 
+                        weekday: 'long', 
+                        day: 'numeric', 
+                        month: 'long', 
+                        year: 'numeric' 
+                    })}</div>
+                    <div class="paper">${session.paper}</div>
+                    <div class="presenter">Presenter: ${session.presenter}</div>
+                `;
+                container.appendChild(sessionDiv);
+            });
+        }
+
+        generateDates();
+    </script>
+</body>
+</html>
