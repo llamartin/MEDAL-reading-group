@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEDAL Reading Group — Paper Selection Survey</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a18;
+    --cream: #f7f4ee;
+    --sage: #5a7260;
+    --sage-light: #8aaa94;
+    --gold: #b08d57;
+    --gold-light: #d4b483;
+    --rule: #d4cfc4;
+    --selected-bg: #edf2ee;
+    --selected-border: #5a7260;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* Letterpress texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 64px 48px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 32px;
+    margin-bottom: 40px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .lab-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--sage);
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    font-weight: 300;
+    color: #555;
+    font-style: italic;
+    line-height: 1.6;
+    max-width: 520px;
+    margin-top: 8px;
+  }
+
+  /* Instructions */
+  .instructions {
+    background: white;
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--sage);
+    padding: 20px 24px;
+    margin-bottom: 40px;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+
+  .instructions p {
+    font-size: 1rem;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .counter {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--sage);
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .counter-badge {
+    background: var(--sage);
+    color: white;
+    padding: 2px 10px;
+    font-size: 12px;
+    border-radius: 2px;
+    transition: background 0.3s;
+  }
+
+  .counter-badge.complete {
+    background: var(--gold);
+  }
+
+  /* Thematic section headers */
+  .section-header {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--sage-light);
+    margin: 40px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /* Paper cards */
+  .paper-card {
+    border: 1px solid var(--rule);
+    background: white;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    animation: fadeUp 0.4s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .paper-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--sage);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.25s ease;
+  }
+
+  .paper-card:hover {
+    border-color: var(--sage-light);
+    box-shadow: 0 2px 12px rgba(90,114,96,0.08);
+    transform: translateY(-1px);
+  }
+
+  .paper-card:hover::before {
+    transform: scaleY(1);
+  }
+
+  .paper-card.selected {
+    background: var(--selected-bg);
+    border-color: var(--selected-border);
+  }
+
+  .paper-card.selected::before {
+    transform: scaleY(1);
+  }
+
+  .paper-card.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .paper-card.disabled:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .paper-inner {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  /* Checkbox column */
+  .paper-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--rule);
+    padding: 16px 0;
+    flex-shrink: 0;
+  }
+
+  .paper-card.selected .paper-check {
+    border-color: var(--selected-border);
+  }
+
+  .checkmark {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--rule);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .paper-card.selected .checkmark {
+    background: var(--sage);
+    border-color: var(--sage);
+  }
+
+  .checkmark svg {
+    opacity: 0;
+    transform: scale(0.6);
+    transition: all 0.2s ease;
+  }
+
+  .paper-card.selected .checkmark svg {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Content column */
+  .paper-content {
+    padding: 14px 16px 14px 16px;
+    min-width: 0;
+  }
+
+  .paper-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.35;
+    margin-bottom: 4px;
+    color: var(--ink);
+  }
+
+  .paper-card.selected .paper-title {
+    color: var(--sage);
+  }
+
+  .paper-authors {
+    font-size: 0.82rem;
+    font-style: italic;
+    color: #777;
+    margin-bottom: 5px;
+    font-weight: 300;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .paper-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .paper-venue {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    color: white;
+    background: var(--gold);
+    padding: 2px 7px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .paper-venue.forthcoming {
+    background: var(--sage-light);
+  }
+
+  .paper-venue.wp {
+    background: #9a9080;
+  }
+
+  .paper-abstract-toggle {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sage);
+    cursor: pointer;
+    text-decoration: none;
+    padding: 2px 0;
+    border-bottom: 1px dotted var(--sage-light);
+    transition: color 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .paper-abstract-toggle:hover {
+    color: var(--ink);
+  }
+
+  .paper-abstract {
+    display: none;
+    font-size: 0.85rem;
+    line-height: 1.65;
+    color: #444;
+    margin-top: 8px;
+    font-weight: 300;
+    border-top: 1px solid var(--rule);
+    padding-top: 8px;
+  }
+
+  .paper-abstract.open {
+    display: block;
+  }
+
+  /* Link column */
+  .paper-link-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    border-left: 1px solid var(--rule);
+    flex-shrink: 0;
+  }
+
+  .paper-card.selected .paper-link-col {
+    border-color: var(--selected-border);
+  }
+
+  .paper-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--sage);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+
+  .paper-link:hover {
+    color: var(--ink);
+  }
+
+  .paper-link svg {
+    flex-shrink: 0;
+  }
+
+  /* Submit area */
+  .submit-area {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    animation: fadeUp 0.5s 0.3s ease both;
+  }
+
+  .name-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sage);
+  }
+
+  .field-input {
+    border: 1px solid var(--rule);
+    background: white;
+    padding: 10px 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    border-radius: 0;
+    -webkit-appearance: none;
+  }
+
+  .field-input:focus {
+    border-color: var(--sage);
+  }
+
+  .btn-submit {
+    background: var(--ink);
+    color: var(--cream);
+    border: none;
+    padding: 14px 40px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-submit:hover {
+    background: var(--sage);
+  }
+
+  .btn-submit:disabled {
+    background: #aaa;
+    cursor: not-allowed;
+  }
+
+  /* Success */
+  .success-panel {
+    display: none;
+    background: var(--selected-bg);
+    border: 1px solid var(--sage);
+    padding: 32px 36px;
+    margin-top: 24px;
+    animation: fadeUp 0.4s ease;
+  }
+
+  .success-panel h3 {
+    font-size: 1.4rem;
+    font-weight: 300;
+    margin-bottom: 12px;
+    color: var(--sage);
+  }
+
+  .success-panel p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    font-weight: 300;
+    color: #444;
+    margin-bottom: 12px;
+  }
+
+  .success-list {
+    list-style: none;
+    margin-top: 12px;
+  }
+
+  .success-list li {
+    font-size: 0.9rem;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--rule);
+    font-style: italic;
+    color: var(--ink);
+  }
+
+  .success-list li:last-child { border-bottom: none; }
+
+  .success-list li::before {
+    content: '—  ';
+    color: var(--sage);
+    font-style: normal;
+  }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Staggered card animations */
+  .paper-card:nth-child(1) { animation-delay: 0.05s; }
+  .paper-card:nth-child(2) { animation-delay: 0.1s; }
+  .paper-card:nth-child(3) { animation-delay: 0.15s; }
+  .paper-card:nth-child(4) { animation-delay: 0.2s; }
+  .paper-card:nth-child(5) { animation-delay: 0.25s; }
+  .paper-card:nth-child(6) { animation-delay: 0.3s; }
+  .paper-card:nth-child(7) { animation-delay: 0.35s; }
+
+  @media (max-width: 600px) {
+    .page { padding: 32px 20px 60px; }
+    .name-row { grid-template-columns: 1fr; }
+    .paper-inner { grid-template-columns: 36px 1fr auto; }
+    .paper-authors { font-size: 0.78rem; }
+    h1 { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="lab-label">Melbourne Environmental Data Analytics Lab · Reading Group</div>
+    <h1>Paper Selection Survey</h1>
+    <p class="subtitle">Please select ten papers you would most like to discuss. Click a row to select it; expand the abstract with the small button. Links open the full paper in a new tab.</p>
+  </div>
+
+  <!-- Instructions -->
+  <div class="instructions">
+    <div class="counter">
+      Selected: <span class="counter-badge" id="counter-badge">0 / 10</span>
+      <span id="counter-msg">Select 10 papers to proceed.</span>
+    </div>
+  </div>
+
+  <div id="paper-list">
+
+    <!-- Energy Markets & Electricity -->
+    <div class="section-header">Energy Markets &amp; Electricity</div>
+
+    <div class="paper-card" data-id="1" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Nuclear Operations with a High Penetration of Renewables: The Case of France</div>
+          <div class="paper-authors">Nicolas Astier &amp; Frank A. Wolak</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">NBER WP 2024</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs1')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs1">Nuclear and intermittent renewables are generally regarded as the only scalable technologies producing low-carbon electricity. Using hourly data from the French power system, this paper finds that nuclear units are operated quite flexibly, but that additional load following events are associated with a higher likelihood of unit failure. In 2024, hours during which available nuclear flexibility was exhausted are associated with non-positive hourly day-ahead prices.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.nber.org/papers/w34662" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="2" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Power Flows: Transmission Lines, Allocative Efficiency, and Corporate Profits</div>
+          <div class="paper-authors">Catherine Hausman</div>
+          <div class="paper-meta">
+            <span class="paper-venue">AER 2025</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs2')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs2">Accelerated investment in electricity transmission could reduce total costs and enhance renewable integration. This paper documents static allocative inefficiencies induced by incomplete market integration in two major US markets — totalling $2 billion in 2022. It also shows that 4 firms would have experienced a collective $1.3 billion drop in net revenues had the market been integrated, suggesting incumbent firms may have incentives to block transmission projects.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.aeaweb.org/articles?id=10.1257/aer.20240276" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Link</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="3" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Power Flows, Part 2: Transmission Lowers US Generation Costs, But Generator Incentives Are Not Aligned</div>
+          <div class="paper-authors">Dasom Ham, Owen Kay &amp; Catherine Hausman</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">RFF WP 2025</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs3')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs3">Eliminating interregional transmission constraints would have reduced US generation costs by $5.8–7.1 billion in 2022 and $3.4–5.0 billion in 2023. Despite these system-wide savings, market integration creates clear winners and losers among generation companies — producers in some regions have incentives to delay or block grid integration despite overall benefits.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://media.rff.org/documents/WP_25-10_kFRJaAE.pdf" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="4" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Does Regulation Distort Exit Decisions? Evidence from U.S. Power Plants</div>
+          <div class="paper-authors">Lucas W. Davis &amp; Paige E. Weber</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">NBER WP 2024</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs4')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs4">Using generator-level data from 2010–2023, this paper shows that regulated power plant units have been 45% less likely to exit than unregulated units. For unregulated units, exit decisions follow wholesale electricity prices and capital costs. Owners of regulated units are largely insulated from these factors and in some cases have strong incentives to continue operating capital-intensive equipment beyond its economic life.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.nber.org/papers/w34454" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="5" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">AI in Charge: Large-Scale Experimental Evidence on Electric Vehicle Charging Demand</div>
+          <div class="paper-authors">Robert D. Metcalfe, Andrew Schein, Cohen R. Simpson &amp; Yixin Sun</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">NBER WP 2025</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs5')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs5">A large-scale natural field experiment evaluating an AI-managed EV charging tariff finds a 42% reduction in household electricity demand during peak hours, with 100% shifted to lower-cost, lower-carbon periods. Algorithm overrides were low, consumer savings were substantial, and results were consistent across the UK, US, Germany, and Spain — suggesting significant scalable welfare gains from AI-managed charging.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.nber.org/papers/w34709" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="6" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Choosing Who Chooses: Selection-Driven Targeting in Energy Rebate Programs</div>
+          <div class="paper-authors">Takanori Ida, Takunori Ishihara, Koichiro Ito, Daido Kido, Toru Kitagawa, Shosei Sakaguchi &amp; Shusaku Sasaki</div>
+          <div class="paper-meta">
+            <span class="paper-venue forthcoming">Forthcoming Econometrica</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs6')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs6">We develop an optimal policy assignment rule that integrates two distinctive approaches commonly used in economics — targeting by observables and targeting through self-selection. Our method can be used with experimental or quasi-experimental data to identify who should be treated, be untreated, and self-select to achieve a policymaker's objective. Applying this method to a randomized controlled trial on a residential energy rebate program, we find that targeting that optimally exploits both observable data and self-selection outperforms conventional targeting. We use the Local Average Treatment Effect (LATE) framework (Imbens and Angrist (1994)) to investigate the mechanism in our approach. By estimating several key LATEs based on the random variation created by our experiment, we demonstrate how our method allows policymakers to identify whose self-selection would be valuable and harmful to social welfare.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://koichiroito.com/pdfs/Choosing_Who_Chooses.pdf" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="7" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Voltage Quality and Economic Activity</div>
+          <div class="paper-authors">S. Berkouwer, P. Biscaye, M. Mikdash, S. Puller &amp; C. Wolfram</div>
+          <div class="paper-meta">
+            <span class="paper-venue forthcoming">R&amp;R JPE: Micro</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs7')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs7">Novel minute-by-minute customer-level power measurements in urban Ghana reveal systematic under-voltage, damaging equipment and incentivising protective investments. Customers would pay 10% more for electricity with better voltage. Quasi-random grid improvements raised average voltage by 5.5V, reducing appliance damages, but yielded minimal economic impacts after one year — pointing to complexity in allocating long-term grid investments using short-term data.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://papers.pierrebiscaye.com/BBMPW_Voltage_Ghana.pdf" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="25" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Holding Up Green Energy: Counterparty Risk in the Indian Solar Power Market</div>
+          <div class="paper-authors">Nicholas Ryan</div>
+          <div class="paper-meta">
+            <span class="paper-venue forthcoming">Cond. Accept Econometrica</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs25')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs25">Counterparty risk of an average Indian state increases solar energy prices by 10%. Central government intermediation eliminates this risk premium entirely. Higher prices reduce investment because state demand for green energy is elastic. Results suggest that the risk of hold-up places developing countries at a structural disadvantage in the procurement of green energy.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://bpb-us-w2.wpmucdn.com/campuspress.yale.edu/dist/5/91/files/2022/10/ryan_holding_up_green_energy_20220819.pdf" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <!-- Environmental Policy & Regulation -->
+    <div class="section-header">Environmental Policy &amp; Regulation</div>
+
+    <div class="paper-card" data-id="8" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Can Pollution Markets Work in Developing Countries? Experimental Evidence from India</div>
+          <div class="paper-authors">Michael Greenstone, Rohini Pande, Nicholas Ryan &amp; Anant Sudarshan</div>
+          <div class="paper-meta">
+            <span class="paper-venue">QJE 2025</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs8')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs8">The world's first particulate matter emissions market, covering industrial plants in a large Indian city, achieved 99% permit compliance vs. 66% under command-and-control. Treatment plants reduced emissions by 20–30% and abatement costs fell by an estimated 11%. Mortality benefits exceeded costs by at least twenty-five times. The market functioned well even in a low-capacity institutional environment.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://academic.oup.com/qje/article-abstract/140/2/1003/8002857" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Link</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="9" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Regulating Untaxable Externalities: Are Vehicle Air Pollution Standards Effective and Efficient?</div>
+          <div class="paper-authors">Mark R. Jacobsen, James M. Sallee, Joseph S. Shapiro &amp; Arthur van Benthem</div>
+          <div class="paper-meta">
+            <span class="paper-venue">QJE 2023</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs9')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs9">Air pollution emissions per mile of new US vehicles fell by over 99% since exhaust standards began in 1967, with standards causing most of this decline. Yet standards are not cost-effective because they fail to encourage scrap of older vehicles, which account for the majority of emissions. Increasing registration fees on dirty vehicles would yield even larger welfare gains by accelerating scrap, though with complex distributional effects.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://academic.oup.com/qje/article-abstract/138/3/1907/7080183" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Link</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="10" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Carbon Taxation and Firm Behavior in Emerging Economies: Evidence from South Africa</div>
+          <div class="paper-authors">Johannes Gallé, Rodrigo Oliveira, Daniel Overbeck, Nadine Riedel &amp; Edson R. Severnini</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">NBER WP 2025</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs10')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs10">The first comprehensive evidence on firm responses to carbon taxation in an emerging economy. South Africa's 2019 carbon tax had no negative effects on firm performance or jobs. Firms facing higher effective tax rates actually increased activity following the announcement — four years before implementation — likely reflecting resolution of regulatory uncertainty and efforts to mitigate stranded asset costs.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.nber.org/papers/w34406" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="11" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">The Geographical Leakage of Environmental Regulation: Evidence from the Clean Air Act</div>
+          <div class="paper-authors">E. Mark Curtis, Weiting Miao, Felix Samy Soliman, Juan Carlos Suárez Serrato &amp; Daniel Yi Xu</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">Working Paper 2025</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs11')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs11">Approximately 40% of geographic leakage from Clean Air Act Amendments is driven by within-firm reallocation across locations — highlighting the critical role of multi-unit firms in shifting economic activity across regions. A spatial equilibrium model integrating these findings quantifies the economic cost of the regulation and its role in redistributing US industrial production.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.dropbox.com/scl/fi/66egddln357pbzr5ghvll/Curtis-Miao-Soliman-Serrato-Xu.pdf?rlkey=7dfniqgoqafbxi16xmu1zkfhc&e=1&dl=0" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="12" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Downwind and Out: The Strategic Dispersion of Power Plants and Their Pollution</div>
+          <div class="paper-authors">John Morehouse &amp; Edward Rubin</div>
+          <div class="paper-meta">
+            <span class="paper-venue forthcoming">Forthcoming JAERE</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs12')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs12">Decision-makers disproportionately sited coal-fueled power plants to reduce counties' and states' own downwind pollution exposure. Natural-gas plants — lower polluters — did not follow this strategy. Within 6 hours, 50% of coal plants' emissions leave their source states and 99% depart source counties — illustrating how local strategic responses challenge federalist environmental governance.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://edrub.in/Papers/draft-plant-locations.pdf" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <!-- Water, Land & Natural Resources -->
+    <div class="section-header">Water, Land &amp; Natural Resources</div>
+
+    <div class="paper-card" data-id="13" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Rationing the Commons</div>
+          <div class="paper-authors">Nicholas Ryan &amp; Anant Sudarshan</div>
+          <div class="paper-meta">
+            <span class="paper-venue">JPE 2022</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs13')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs13">Rationing agricultural groundwater in Rajasthan, India leads farmers to use roughly the socially optimal amount of water on average — yet the regime is grossly inefficient because it misallocates water across farmers, lowering productivity. Pigouvian reform would increase agricultural surplus by 12% of household income yet still fall well short of a Pareto improvement over rationing.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.journals.uchicago.edu/doi/abs/10.1086/717045" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Link</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="14" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">The Value of Clean Water: Experimental Evidence from Rural India</div>
+          <div class="paper-authors">Fiona Burlig, Amir Jina &amp; Anant Sudarshan</div>
+          <div class="paper-meta">
+            <span class="paper-venue forthcoming">Forthcoming AER</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs14')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs14">A 60,000-household cluster RCT testing decentralised treatment and home-delivery of clean water finds take-up exceeding 90% at low prices. Willingness-to-pay is several times higher than prior indirect estimates; willingness-to-accept exceeds marginal cost. Self-reported health measures improve accordingly, and free water delivery regimes appear highly cost-effective on a cost-per-DALY basis.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.aeaweb.org/articles?id=10.1257/aer.20250278" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Link</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="15" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Conservation Priorities and Environmental Offsets: Markets for Florida Wetlands</div>
+          <div class="paper-authors">Daniel Aronoff &amp; Will Rafey</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">Working Paper</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs15')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs15">Wetland offset markets in Florida generated $2.4 billion of net surplus from 1995–2020 relative to direct conservation. However, offset trading also generated new hydrological externalities. A locally differentiated Pigouvian tax would have prevented $1.6 billion of new flood damage while preserving more than two-thirds of the private gains from trade.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://rafey.io/files/bayou.pdf" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="16" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Machine Learning Predicts Which Rivers, Streams, and Wetlands the Clean Water Act Regulates</div>
+          <div class="paper-authors">Simon Greenhill, Hannah Druckenmiller, Sherrie Wang, David A. Keiser, et al.</div>
+          <div class="paper-meta">
+            <span class="paper-venue">Science 2025</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs16')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs16">A deep learning model trained on 150,000 Army Corps jurisdictional determinations reveals that a 2020 White House rule deregulated 690,000 stream miles, 35 million wetland acres, and 30% of waters around drinking-water sources. The framework can support permitting, policy design, and use of machine learning in regulatory implementation problems.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.science.org/doi/10.1126/science.adi3794" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Link</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="29" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Consequences of Land Use Regulation Under the Clean Water Act</div>
+          <div class="paper-authors">Hannah Druckenmiller, Joseph S. Shapiro &amp; Charles A. Taylor</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">Working Paper</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs29')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs29">Recent White House and Supreme Court rule changes greatly altered Clean Water Act regulatory stringency, measured using geophysical data and machine learning. Regulation substantially decreases values of non-residential land parcels with water resources and decreases development activity, as measured from permitting and satellite data.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://joseph-s-shapiro.com/research/WOTUS_landvalues.pdf" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <!-- Climate, Health & Behavior -->
+    <div class="section-header">Climate, Health &amp; Behaviour</div>
+
+    <div class="paper-card" data-id="17" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Mandated versus Voluntary Adaptation to Natural Disasters: The Case of US Wildfires</div>
+          <div class="paper-authors">Patrick Baylis &amp; Judson Boomhower</div>
+          <div class="paper-meta">
+            <span class="paper-venue">JPE 2026</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs17')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs17">California wildfire building codes increase structure survival and reduce structure-to-structure spread. The paper develops and estimates a model comparing the social benefits of mandatory building standards versus voluntary adaptation policies — finding remarkable resilience effects and positive spillovers to neighbouring structures from mandated codes.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.journals.uchicago.edu/doi/10.1086/739331" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Link</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="18" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">How Are Insurance Markets Adapting to Climate Change? Risk Classification and Pricing in Homeowners Insurance</div>
+          <div class="paper-authors">Judson Boomhower, Meredith Fowlie, Jacob Gellman &amp; Andrew Plantinga</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">NBER WP 2024</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs18')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs18">Firms relying on coarser wildfire risk measures face severe adverse selection and charge higher prices in high-risk segments — or exit these markets entirely. A theoretical model incorporating asymmetric risk classification and market regulation explains the empirical patterns: the winner's curse can increase prices and limit participation in insurance markets for large, hard-to-model risks.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.nber.org/papers/w32625" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="19" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Misperceptions About Air Pollution: Implications for Willingness to Pay and Environmental Inequality</div>
+          <div class="paper-authors">Matthew Tarduno &amp; Reed Walker</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">Working Paper</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs19')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs19">US respondents overestimate both their air pollution exposure and its impact on life expectancy. Using randomised information on actual air pollution, the paper traces how experimentally induced belief changes affect WTP for air quality. Despite some differences in misperceptions between Black and White respondents, rectifying these misperceptions would not meaningfully close observed gaps in WTP or pollution exposure.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.dropbox.com/scl/fi/ialedsd1o0yqdy4u2g3ct/TardunoWalkerAirInfo.pdf?rlkey=o1q1m3unwzm83db2lz539mcf5&e=1&dl=0" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="27" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Impacts of Contemporaneous Air Pollution Exposure on Cognitive Performance in Kenya</div>
+          <div class="paper-authors">Xuqian Ma, Michelle N. Layvant, Edward Miguel, Eric Ochieng, Ajay Pillarisetti &amp; Michael W. Walker</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">NBER WP 2025</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs27')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs27">Higher PM2.5 exposure during cognitive testing in Kenya is associated with lower performance in memory, executive function, and visuospatial tasks. Effects are significantly larger among more educated individuals and are evident at PM2.5 levels below Kenya's regulatory threshold — suggesting short-term exposure imposes underappreciated human capital costs that current standards fail to mitigate.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.nber.org/papers/w34557" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <!-- Trade, Finance & Behaviour -->
+    <div class="section-header">Trade, Finance &amp; Behaviour</div>
+
+    <div class="paper-card" data-id="20" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Institutions, Comparative Advantage, and the Environment</div>
+          <div class="paper-authors">Joseph S. Shapiro</div>
+          <div class="paper-meta">
+            <span class="paper-venue">ReStud 2025</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs20')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs20">Strong institutions — financial, judicial, and labour market — provide comparative advantage in clean industries, and thereby improve a country's environmental quality. Five complementary tests evaluate this hypothesis. A quantitative general equilibrium model indicates that strengthening institutions decreases domestic pollution by relocating dirty industries abroad, though it increases pollution in other countries.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://academic.oup.com/restud/article/92/6/4152/8045287" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Link</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="21" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Trade, Trees, and Lives</div>
+          <div class="paper-authors">Xinming Du, Lei Li &amp; Eric Zou</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">NBER WP 2024</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs21')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs21">Brazilian agricultural export shocks cause a near one-for-one decline in forest cover. Loss of forests that filter air pollutants as they travel causes downstream rises in air pollution and mortality. Estimated mortality effects: over 700,000 premature deaths in Brazil over two decades, equating to $0.18 loss in statistical life value per $1 agricultural exports.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.nber.org/papers/w33143" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="22" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">The Effects of Regulating Greenwashing: Evidence from Europe's Sustainable Finance Disclosure Regulation</div>
+          <div class="paper-authors">Hunt Allcott, Mark L. Egan, Paul Smeets &amp; Hanbin Yang</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">NBER WP 2025</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs22')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs22">The EU's SFDR had little effect on fund flows or portfolio sustainability. Disclosures were ineffective because they offered little new information beyond what investors could already infer from fund names and mandates. Experimental evidence shows current disclosures have minimal impact on investor decisions, but more intuitive presentation of the information could substantially improve the regulation's effectiveness.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.nber.org/papers/w34624" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="23" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">ESG Aversion: Experimental Evidence on Perceptions and Preferences</div>
+          <div class="paper-authors">Ye Zhang &amp; Eric Zou</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">NBER WP 2024</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs23')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs23">ESG-labelled startup profiles receive lower interest from both founders and VCs — primarily driven by negative performance beliefs. A willingness-to-pay experiment reveals a latent preference for ESG once performance concerns are held constant. These findings highlight a tension between financial returns and personal values: profitability concerns obscure an underlying taste for ESG.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.nber.org/papers/w34048" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="24" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Self- and Social Signaling: Evidence from Solar Adoption in California</div>
+          <div class="paper-authors">Bollinger, Gillingham &amp; Kirkpatrick</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">NBER WP 2025</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs24')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs24">Self-signaling is separately identified from social signaling in residential solar adoption by exploiting exogenous variation in the visibility of potential solar arrays. Political affiliation of proximate peers influences the extent of self-signaling and is crowded out by the private benefits of installing solar — distinguishing signalling motivations from warm glow and other prosocial explanations.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.nber.org/papers/w34652" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <!-- Equity & Distributional Impacts -->
+    <div class="section-header">Equity &amp; Distributional Impacts</div>
+
+    <div class="paper-card" data-id="26" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">The Distribution of Power: Favoritism, Efficiency, and Equity in Energy Infrastructure</div>
+          <div class="paper-authors">Catherine D. Wolfram, Susanna B. Berkouwer, Felipe Vial, Eric Hsu, Oliver W. Kim &amp; Edward Miguel</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">Working Paper</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs26')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs26">Areas with pro-government vote shares in Kenya received 35–42% more household electrification than the legislated formula stipulated. Surprisingly, this deviation increased total consumer surplus by 2% — at the expense of opposition voters, who received 21% less surplus gain than under the formula. The counterfactual surplus-maximising allocation is in fact politically neutral, meaning political bias cannot be justified on efficiency grounds alone.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://sberkouwer.github.io/WBVHKM_LMCP.pdf" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+    <div class="paper-card" data-id="28" onclick="toggleSelect(this)">
+      <div class="paper-inner">
+        <div class="paper-check"><div class="checkmark"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div class="paper-content">
+          <div class="paper-title">Who Bears the Burden of Climate Inaction?</div>
+          <div class="paper-authors">Kimberly A. Clausing, Christopher R. Knittel &amp; Catherine Wolfram</div>
+          <div class="paper-meta">
+            <span class="paper-venue wp">NBER WP 2025</span>
+            <button class="paper-abstract-toggle" onclick="toggleAbstract(event, 'abs28')">Abstract</button>
+          </div>
+          <div class="paper-abstract" id="abs28">An aggregate annual climate cost averaging between $400 and $900 per US household, with costs exceeding $1,300 in 10% of counties. Costs disproportionately burden lower-income households. Natural disasters — not rising temperatures — account for the bulk of the current burden, emphasising the importance of research beyond temperature effects.</div>
+        </div>
+        <div class="paper-link-col"><a class="paper-link" href="https://www.nber.org/papers/w34525" target="_blank" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PDF</a></div>
+      </div>
+    </div>
+
+  </div><!-- end paper-list -->
+
+  <!-- Submit -->
+  <div class="submit-area">
+    <div class="name-row">
+      <div class="field-group">
+        <label class="field-label" for="fname">Name</label>
+        <input class="field-input" type="text" id="fname" placeholder="Your name">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="femail">Email (optional)</label>
+        <input class="field-input" type="email" id="femail" placeholder="your@email.com">
+      </div>
+    </div>
+    <button class="btn-submit" id="btn-submit" onclick="submitForm()" disabled>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Submit Selection
+    </button>
+  </div>
+
+  <div class="success-panel" id="success-panel">
+    <h3>Thank you — selection received.</h3>
+    <p>Your ten papers have been noted. The organising team will compile responses and confirm the programme shortly.</p>
+    <ul class="success-list" id="success-list"></ul>
+  </div>
+
+</div>
+
+<script>
+  const MAX = 10;
+  let selected = [];
+
+  const paperTitles = {
+    1: "Nuclear Operations with a High Penetration of Renewables",
+    2: "Power Flows: Transmission Lines, Allocative Efficiency, and Corporate Profits",
+    3: "Power Flows, Part 2: Transmission Lowers US Generation Costs",
+    4: "Does Regulation Distort Exit Decisions? Evidence from U.S. Power Plants",
+    5: "AI in Charge: Large-Scale Experimental Evidence on EV Charging Demand",
+    6: "Choosing Who Chooses: Selection-Driven Targeting in Energy Rebate Programs",
+    7: "Voltage Quality and Economic Activity",
+    8: "Can Pollution Markets Work in Developing Countries?",
+    9: "Regulating Untaxable Externalities: Are Vehicle Air Pollution Standards Effective?",
+    10: "Carbon Taxation and Firm Behavior in Emerging Economies",
+    11: "The Geographical Leakage of Environmental Regulation",
+    12: "Downwind and Out: Strategic Dispersion of Power Plants and Their Pollution",
+    13: "Rationing the Commons",
+    14: "The Value of Clean Water: Experimental Evidence from Rural India",
+    15: "Conservation Priorities and Environmental Offsets: Markets for Florida Wetlands",
+    16: "Machine Learning Predicts Which Waters the Clean Water Act Regulates",
+    17: "Mandated versus Voluntary Adaptation to Natural Disasters",
+    18: "How Are Insurance Markets Adapting to Climate Change?",
+    19: "Misperceptions About Air Pollution: Implications for WTP and Environmental Inequality",
+    20: "Institutions, Comparative Advantage, and the Environment",
+    21: "Trade, Trees, and Lives",
+    22: "The Effects of Regulating Greenwashing: Evidence from SFDR",
+    23: "ESG Aversion: Experimental Evidence on Perceptions and Preferences",
+    24: "Self- and Social Signaling: Evidence from Solar Adoption in California",
+    25: "Holding Up Green Energy: Counterparty Risk in the Indian Solar Power Market",
+    26: "The Distribution of Power: Favoritism, Efficiency, and Equity in Energy Infrastructure",
+    27: "Impacts of Contemporaneous Air Pollution Exposure on Cognitive Performance in Kenya",
+    28: "Who Bears the Burden of Climate Inaction?",
+    29: "Consequences of Land Use Regulation Under the Clean Water Act"
+  };
+
+  function toggleSelect(card) {
+    const id = parseInt(card.dataset.id);
+    if (selected.includes(id)) {
+      selected = selected.filter(x => x !== id);
+      card.classList.remove('selected');
+    } else {
+      if (selected.length >= MAX) return;
+      selected.push(id);
+      card.classList.add('selected');
+    }
+    updateUI();
+  }
+
+  function updateUI() {
+    const badge = document.getElementById('counter-badge');
+    const msg = document.getElementById('counter-msg');
+    const btn = document.getElementById('btn-submit');
+    badge.textContent = selected.length + ' / ' + MAX;
+    badge.className = 'counter-badge' + (selected.length === MAX ? ' complete' : '');
+    if (selected.length === MAX) {
+      msg.textContent = 'Ready to submit.';
+      btn.disabled = false;
+    } else {
+      const rem = MAX - selected.length;
+      msg.textContent = 'Select ' + rem + ' more paper' + (rem !== 1 ? 's' : '') + ' to proceed.';
+      btn.disabled = true;
+    }
+
+    // Disable unselected cards when at max
+    document.querySelectorAll('.paper-card').forEach(card => {
+      const id = parseInt(card.dataset.id);
+      if (selected.length >= MAX && !selected.includes(id)) {
+        card.classList.add('disabled');
+      } else {
+        card.classList.remove('disabled');
+      }
+    });
+  }
+
+  function toggleAbstract(event, id) {
+    event.stopPropagation();
+    const el = document.getElementById(id);
+    el.classList.toggle('open');
+    event.target.textContent = el.classList.contains('open') ? 'Hide' : 'Abstract';
+  }
+
+  async function submitForm() {
+    const name = document.getElementById('fname').value.trim() || 'Anonymous';
+    const email = document.getElementById('femail').value.trim();
+    const btn = document.getElementById('btn-submit');
+
+    const chosenTitles = selected.sort((a,b) => a-b).map(id => paperTitles[id]);
+
+    const data = {
+      name: name,
+      email: email,
+      selections: chosenTitles.join('\n')
+    };
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    try {
+      const response = await fetch('https://formspree.io/f/xwvnqkrj', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        const list = document.getElementById('success-list');
+        list.innerHTML = '';
+        chosenTitles.forEach(title => {
+          const li = document.createElement('li');
+          li.textContent = title;
+          list.appendChild(li);
+        });
+        document.getElementById('success-panel').style.display = 'block';
+        btn.textContent = 'Submitted';
+        document.getElementById('success-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Submit Selection';
+        alert('Something went wrong — please try again.');
+      }
+    } catch(e) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Submit Selection';
+      alert('Network error — please check your connection and try again.');
+    }
+  }
+</script>
+</body>
+</html>
