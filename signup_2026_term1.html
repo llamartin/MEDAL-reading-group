@@ -93,14 +93,13 @@
   .instructions p + p { margin-top: 8px; }
   .instructions strong { font-weight: 600; }
 
-  /* Loading overlay */
+  /* Loading bar */
   .loading-bar {
     height: 2px;
     background: var(--rule);
     width: 100%;
     margin-bottom: 32px;
     overflow: hidden;
-    animation: fadeDown 0.4s ease both;
   }
 
   .loading-bar-fill {
@@ -183,20 +182,22 @@
   }
 
   .progress-track { height: 3px; background: var(--rule); width: 100%; }
-  .progress-fill { height: 3px; background: var(--sage); transition: width 0.4s ease; width: 0%; }
+  .progress-fill  { height: 3px; background: var(--sage); transition: width 0.4s ease; width: 0%; }
 
-  /* Paper cards */
+  /* ── Paper cards (match survey style) ───────────────────────────────────── */
   .paper-card {
     border: 1px solid var(--rule);
     background: white;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     animation: fadeUp 0.4s ease both;
     position: relative;
     overflow: hidden;
-    transition: border-color 0.2s;
+    transition: all 0.2s ease;
   }
 
-  .paper-card.claimed-mine  { border-color: var(--sage); background: var(--selected-bg); }
+  .paper-card:hover { border-color: var(--sage-light); box-shadow: 0 2px 12px rgba(90,114,96,0.08); }
+
+  .paper-card.claimed-mine  { background: var(--selected-bg); border-color: var(--selected-border); }
   .paper-card.claimed-other { opacity: 0.72; }
 
   .paper-card-bar {
@@ -209,57 +210,164 @@
     transition: transform 0.25s ease;
   }
 
+  .paper-card:hover .paper-card-bar,
   .paper-card.claimed-mine .paper-card-bar { transform: scaleY(1); }
 
+  /* Three-column layout: actions | content | link */
   .paper-inner {
-    padding: 16px 20px 16px 24px;
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 16px;
-    align-items: start;
+    grid-template-columns: auto 1fr auto;
+    align-items: stretch;
   }
 
-  .paper-title { font-size: 1.05rem; font-weight: 400; line-height: 1.4; margin-bottom: 3px; }
+  /* Left col: claim/release button */
+  .paper-action-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    border-right: 1px solid var(--rule);
+    flex-shrink: 0;
+    min-width: 56px;
+  }
 
-  .paper-tag {
+  .paper-card.claimed-mine  .paper-action-col,
+  .paper-card.claimed-other .paper-action-col { border-color: var(--selected-border); }
+  .paper-card.claimed-other .paper-action-col { border-color: var(--rule); }
+
+  /* Middle col: title, authors, meta, abstract */
+  .paper-content { padding: 14px 16px; min-width: 0; }
+
+  .paper-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.35;
+    margin-bottom: 4px;
+    color: var(--ink);
+  }
+
+  .paper-card.claimed-mine .paper-title { color: var(--sage); }
+
+  .paper-authors {
+    font-size: 0.82rem;
+    font-style: italic;
+    color: #777;
+    margin-bottom: 5px;
+    font-weight: 300;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .paper-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  .paper-venue {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    color: white;
+    background: var(--gold);
+    padding: 2px 7px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .paper-venue.forthcoming { background: var(--sage-light); }
+  .paper-venue.wp          { background: #9a9080; }
+
+  .paper-abstract-toggle {
     font-family: 'DM Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.1em;
-    color: var(--sage-light);
     text-transform: uppercase;
+    color: var(--sage);
+    cursor: pointer;
+    background: none;
+    border: none;
+    border-bottom: 1px dotted var(--sage-light);
+    padding: 2px 0;
+    transition: color 0.2s;
   }
 
-  .paper-presenter { font-size: 0.9rem; font-style: italic; color: var(--sage); margin-top: 6px; }
-  .paper-presenter.empty { color: #bbb; }
+  .paper-abstract-toggle:hover { color: var(--ink); }
 
-  .paper-actions { display: flex; align-items: flex-start; gap: 8px; flex-shrink: 0; margin-top: 2px; }
+  .paper-abstract {
+    display: none;
+    font-size: 0.85rem;
+    line-height: 1.65;
+    color: #444;
+    margin-top: 8px;
+    font-weight: 300;
+    border-top: 1px solid var(--rule);
+    padding-top: 8px;
+  }
 
-  .btn-claim {
+  .paper-abstract.open { display: block; }
+
+  /* Presenter tag shown below meta when claimed */
+  .paper-presenter-tag {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.08em;
+    color: var(--sage);
+    margin-top: 6px;
+  }
+
+  /* Right col: PDF link */
+  .paper-link-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    border-left: 1px solid var(--rule);
+    flex-shrink: 0;
+  }
+
+  .paper-card.claimed-mine .paper-link-col { border-color: var(--selected-border); }
+
+  .paper-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--sage);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+
+  .paper-link:hover { color: var(--ink); }
+
+  /* Claim / Release buttons */
+  .btn-claim {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     background: none;
     border: 1px solid var(--sage);
     color: var(--sage);
-    padding: 5px 14px;
+    padding: 4px 10px;
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
   }
 
   .btn-claim:hover:not(:disabled) { background: var(--sage); color: white; }
-  .btn-claim:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-claim:disabled { opacity: 0.35; cursor: not-allowed; border-color: var(--rule); color: #aaa; }
 
   .btn-release {
     font-family: 'DM Mono', monospace;
     font-size: 9px;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     background: none;
     border: 1px solid var(--rule);
     color: #aaa;
-    padding: 5px 12px;
+    padding: 4px 10px;
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
@@ -267,11 +375,12 @@
 
   .btn-release:hover { border-color: #e07070; color: #e07070; }
 
-  /* Availability picker */
+  /* ── Availability picker ─────────────────────────────────────────────────── */
   .avail-section {
     border-top: 1px solid var(--rule);
     padding: 16px 24px 20px;
     display: none;
+    background: var(--selected-bg);
   }
 
   .avail-section.open { display: block; }
@@ -286,7 +395,7 @@
   }
 
   .avail-months { display: flex; flex-wrap: wrap; gap: 20px; }
-  .avail-month { min-width: 140px; }
+  .avail-month  { min-width: 140px; }
 
   .month-name {
     font-family: 'DM Mono', monospace;
@@ -312,8 +421,8 @@
     user-select: none;
   }
 
-  .date-chip:hover { border-color: var(--sage); color: var(--sage); }
-  .date-chip.on { background: var(--sage); border-color: var(--sage); color: white; }
+  .date-chip:hover  { border-color: var(--sage); color: var(--sage); }
+  .date-chip.on     { background: var(--sage); border-color: var(--sage); color: white; }
 
   .avail-counter {
     font-family: 'DM Mono', monospace;
@@ -324,7 +433,7 @@
 
   .avail-counter span { color: var(--sage); }
 
-  /* Submit */
+  /* ── Submit ──────────────────────────────────────────────────────────────── */
   .submit-area {
     margin-top: 48px;
     padding-top: 32px;
@@ -360,37 +469,16 @@
     line-height: 1.5;
   }
 
-  /* Info panels */
-  .panel {
-    margin-top: 32px;
-    padding: 24px;
-    display: none;
-  }
-
+  /* ── Info panels ─────────────────────────────────────────────────────────── */
+  .panel { margin-top: 32px; padding: 24px; display: none; }
   .panel h3 { font-weight: 300; font-size: 1.2rem; margin-bottom: 8px; letter-spacing: -0.01em; }
   .panel p  { font-size: 0.95rem; font-weight: 300; font-style: italic; color: #666; line-height: 1.6; }
 
-  .panel-waiting {
-    background: white;
-    border: 1px solid var(--rule);
-    border-left: 3px solid var(--gold);
-  }
-
-  .panel-schedule {
-    background: var(--selected-bg);
-    border: 1px solid var(--selected-border);
-  }
-
-  .panel-schedule h3 { margin-bottom: 4px; }
+  .panel-waiting  { background: white; border: 1px solid var(--rule); border-left: 3px solid var(--gold); }
+  .panel-schedule { background: var(--selected-bg); border: 1px solid var(--selected-border); }
   .panel-schedule .sub { font-size: 0.9rem; font-style: italic; color: #777; margin-bottom: 20px; font-weight: 300; }
-
-  .panel-error {
-    background: #fff8f0;
-    border: 1px solid var(--gold-light);
-    border-left: 3px solid var(--gold);
-  }
-
-  .panel-error p { color: #7a5c30; }
+  .panel-error    { background: #fff8f0; border: 1px solid var(--gold-light); border-left: 3px solid var(--gold); }
+  .panel-error p  { color: #7a5c30; }
 
   .schedule-row {
     display: flex;
@@ -402,8 +490,8 @@
   }
 
   .schedule-row:last-child { border-bottom: none; }
-  .schedule-paper-title    { font-size: 1rem; font-weight: 400; }
-  .schedule-presenter      { font-size: 0.85rem; font-style: italic; color: var(--sage); }
+  .schedule-paper-title { font-size: 1rem; font-weight: 400; }
+  .schedule-presenter   { font-size: 0.85rem; font-style: italic; color: var(--sage); }
 
   .schedule-date {
     font-family: 'DM Mono', monospace;
@@ -413,7 +501,7 @@
     flex-shrink: 0;
   }
 
-  /* Error toast */
+  /* Toast */
   .toast {
     position: fixed;
     bottom: 24px;
@@ -425,7 +513,6 @@
     font-size: 11px;
     letter-spacing: 0.08em;
     padding: 12px 24px;
-    border-radius: 2px;
     transition: transform 0.3s ease;
     z-index: 100;
     white-space: nowrap;
@@ -448,6 +535,7 @@
   @media (max-width: 600px) {
     .page { padding: 36px 20px 60px; }
     .avail-months { gap: 16px; }
+    .paper-authors { white-space: normal; }
   }
 </style>
 </head>
@@ -455,7 +543,7 @@
 <div class="page">
 
   <div class="header">
-    <div class="lab-label">MEDAL · University of Melbourne</div>
+    <div class="lab-label">Melbourne Environmental Data Analytics Lab · Reading Group</div>
     <h1>Reading Group <em>2026</em><br>Presentation Sign-Up</h1>
     <p class="subtitle">Claim a paper and mark every Monday you are available to present. Dates will be assigned once all ten papers are claimed.</p>
   </div>
@@ -466,7 +554,6 @@
     <p><strong>Step 3.</strong> Click <em>Submit Availability</em>. Once all ten papers are claimed and everyone has submitted, a schedule will be computed and emailed to the organiser.</p>
   </div>
 
-  <!-- Loading bar shown while fetching initial state -->
   <div class="loading-bar" id="loading-bar">
     <div class="loading-bar-fill"></div>
   </div>
@@ -513,28 +600,99 @@
       <p>The current availability sets don't allow a conflict-free schedule. Please coordinate directly or ask participants to mark additional dates.</p>
     </div>
 
-  </div><!-- /main-content -->
+  </div>
 
-</div><!-- /page -->
+</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── CONFIG — paste your Apps Script deployment URL here ──────────────────────
+// ── CONFIG ────────────────────────────────────────────────────────────────────
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx9nGtGzqngqMl4-kVEv711G4SnnN98tOkQy60jiCeTypUzf7jOS-sL-PavMLWEfr-f/exec';   // ← replace after deploying
 
-// ── Paper definitions ─────────────────────────────────────────────────────────
+
+// ── Paper data (from finalised survey) ───────────────────────────────────────
 const PAPERS = [
-  { id: 1,  title: "Can Pollution Markets Work in Developing Countries?",                                tag: "Environmental Markets" },
-  { id: 2,  title: "The Geographical Leakage of Environmental Regulation",                              tag: "Regulation & Leakage" },
-  { id: 3,  title: "The Value of Clean Water: Experimental Evidence from Rural India",                  tag: "Water & Development" },
-  { id: 4,  title: "Downwind and Out: Strategic Dispersion of Power Plants and Their Pollution",        tag: "Air Quality & Strategy" },
-  { id: 5,  title: "Machine Learning Predicts Which Waters the Clean Water Act Regulates",              tag: "ML & Environmental Law" },
-  { id: 6,  title: "AI in Charge: Large-Scale Experimental Evidence on EV Charging Demand",            tag: "Energy & AI" },
-  { id: 7,  title: "Regulating Untaxable Externalities: Are Vehicle Air Pollution Standards Effective?", tag: "Transport & Regulation" },
-  { id: 8,  title: "Who Bears the Burden of Climate Inaction?",                                        tag: "Equity & Climate" },
-  { id: 9,  title: "Power Flows: Transmission Lines, Allocative Efficiency, and Corporate Profits",    tag: "Energy Markets" },
-  { id: 10, title: "Choosing Who Chooses: Selection-Driven Targeting in Energy Rebate Programs",       tag: "Energy Policy" },
+  {
+    id: 8,
+    title: "Can Pollution Markets Work in Developing Countries? Experimental Evidence from India",
+    authors: "Michael Greenstone, Rohini Pande, Nicholas Ryan & Anant Sudarshan",
+    venue: "QJE 2025", venueClass: "",
+    abstract: "The world's first particulate matter emissions market, covering industrial plants in a large Indian city, achieved 99% permit compliance vs. 66% under command-and-control. Treatment plants reduced emissions by 20–30% and abatement costs fell by an estimated 11%. Mortality benefits exceeded costs by at least twenty-five times. The market functioned well even in a low-capacity institutional environment.",
+    link: "https://academic.oup.com/qje/article-abstract/140/2/1003/8002857", linkText: "Link"
+  },
+  {
+    id: 11,
+    title: "The Geographical Leakage of Environmental Regulation: Evidence from the Clean Air Act",
+    authors: "E. Mark Curtis, Weiting Miao, Felix Samy Soliman, Juan Carlos Suárez Serrato & Daniel Yi Xu",
+    venue: "Working Paper 2025", venueClass: "wp",
+    abstract: "Approximately 40% of geographic leakage from Clean Air Act Amendments is driven by within-firm reallocation across locations — highlighting the critical role of multi-unit firms in shifting economic activity across regions. A spatial equilibrium model integrating these findings quantifies the economic cost of the regulation and its role in redistributing US industrial production.",
+    link: "https://www.dropbox.com/scl/fi/66egddln357pbzr5ghvll/Curtis-Miao-Soliman-Serrato-Xu.pdf?rlkey=7dfniqgoqafbxi16xmu1zkfhc&e=1&dl=0", linkText: "PDF"
+  },
+  {
+    id: 14,
+    title: "The Value of Clean Water: Experimental Evidence from Rural India",
+    authors: "Fiona Burlig, Amir Jina & Anant Sudarshan",
+    venue: "Forthcoming AER", venueClass: "forthcoming",
+    abstract: "A 60,000-household cluster RCT testing decentralised treatment and home-delivery of clean water finds take-up exceeding 90% at low prices. Willingness-to-pay is several times higher than prior indirect estimates; willingness-to-accept exceeds marginal cost. Self-reported health measures improve accordingly, and free water delivery regimes appear highly cost-effective on a cost-per-DALY basis.",
+    link: "https://www.aeaweb.org/articles?id=10.1257/aer.20250278", linkText: "Link"
+  },
+  {
+    id: 12,
+    title: "Downwind and Out: The Strategic Dispersion of Power Plants and Their Pollution",
+    authors: "John Morehouse & Edward Rubin",
+    venue: "Forthcoming JAERE", venueClass: "forthcoming",
+    abstract: "Decision-makers disproportionately sited coal-fueled power plants to reduce counties' and states' own downwind pollution exposure. Natural-gas plants — lower polluters — did not follow this strategy. Within 6 hours, 50% of coal plants' emissions leave their source states and 99% depart source counties — illustrating how local strategic responses challenge federalist environmental governance.",
+    link: "https://edrub.in/Papers/draft-plant-locations.pdf", linkText: "PDF"
+  },
+  {
+    id: 16,
+    title: "Machine Learning Predicts Which Rivers, Streams, and Wetlands the Clean Water Act Regulates",
+    authors: "Simon Greenhill, Hannah Druckenmiller, Sherrie Wang, David A. Keiser, et al.",
+    venue: "Science 2025", venueClass: "",
+    abstract: "A deep learning model trained on 150,000 Army Corps jurisdictional determinations reveals that a 2020 White House rule deregulated 690,000 stream miles, 35 million wetland acres, and 30% of waters around drinking-water sources. The framework can support permitting, policy design, and use of machine learning in regulatory implementation problems.",
+    link: "https://www.science.org/doi/10.1126/science.adi3794", linkText: "Link"
+  },
+  {
+    id: 5,
+    title: "AI in Charge: Large-Scale Experimental Evidence on Electric Vehicle Charging Demand",
+    authors: "Robert D. Metcalfe, Andrew Schein, Cohen R. Simpson & Yixin Sun",
+    venue: "NBER WP 2025", venueClass: "wp",
+    abstract: "A large-scale natural field experiment evaluating an AI-managed EV charging tariff finds a 42% reduction in household electricity demand during peak hours, with 100% shifted to lower-cost, lower-carbon periods. Algorithm overrides were low, consumer savings were substantial, and results were consistent across the UK, US, Germany, and Spain — suggesting significant scalable welfare gains from AI-managed charging.",
+    link: "https://www.nber.org/papers/w34709", linkText: "PDF"
+  },
+  {
+    id: 9,
+    title: "Regulating Untaxable Externalities: Are Vehicle Air Pollution Standards Effective and Efficient?",
+    authors: "Mark R. Jacobsen, James M. Sallee, Joseph S. Shapiro & Arthur van Benthem",
+    venue: "QJE 2023", venueClass: "",
+    abstract: "Air pollution emissions per mile of new US vehicles fell by over 99% since exhaust standards began in 1967, with standards causing most of this decline. Yet standards are not cost-effective because they fail to encourage scrap of older vehicles, which account for the majority of emissions. Increasing registration fees on dirty vehicles would yield even larger welfare gains by accelerating scrap, though with complex distributional effects.",
+    link: "https://academic.oup.com/qje/article-abstract/138/3/1907/7080183", linkText: "Link"
+  },
+  {
+    id: 28,
+    title: "Who Bears the Burden of Climate Inaction?",
+    authors: "Kimberly A. Clausing, Christopher R. Knittel & Catherine Wolfram",
+    venue: "NBER WP 2025", venueClass: "wp",
+    abstract: "An aggregate annual climate cost averaging between $400 and $900 per US household, with costs exceeding $1,300 in 10% of counties. Costs disproportionately burden lower-income households. Natural disasters — not rising temperatures — account for the bulk of the current burden, emphasising the importance of research beyond temperature effects.",
+    link: "https://www.nber.org/papers/w34525", linkText: "PDF"
+  },
+  {
+    id: 2,
+    title: "Power Flows: Transmission Lines, Allocative Efficiency, and Corporate Profits",
+    authors: "Catherine Hausman",
+    venue: "AER 2025", venueClass: "",
+    abstract: "Accelerated investment in electricity transmission could reduce total costs and enhance renewable integration. This paper documents static allocative inefficiencies induced by incomplete market integration in two major US markets — totalling $2 billion in 2022. It also shows that 4 firms would have experienced a collective $1.3 billion drop in net revenues had the market been integrated, suggesting incumbent firms may have incentives to block transmission projects.",
+    link: "https://www.aeaweb.org/articles?id=10.1257/aer.20240276", linkText: "Link"
+  },
+  {
+    id: 6,
+    title: "Choosing Who Chooses: Selection-Driven Targeting in Energy Rebate Programs",
+    authors: "Takanori Ida, Takunori Ishihara, Koichiro Ito, Daido Kido, Toru Kitagawa, Shosei Sakaguchi & Shusaku Sasaki",
+    venue: "Forthcoming Econometrica", venueClass: "forthcoming",
+    abstract: "We develop an optimal policy assignment rule that integrates two distinctive approaches commonly used in economics — targeting by observables and targeting through self-selection. Our method can be used with experimental or quasi-experimental data to identify who should be treated, be untreated, and self-select to achieve a policymaker's objective. Applying this method to a randomized controlled trial on a residential energy rebate program, we find that targeting that optimally exploits both observable data and self-selection outperforms conventional targeting.",
+    link: "https://koichiroito.com/pdfs/Choosing_Who_Chooses.pdf", linkText: "PDF"
+  },
 ];
 
 const MONTHS = [
@@ -546,26 +704,32 @@ const MONTHS = [
 
 const ALL_DATES = MONTHS.flatMap(m => m.dates);
 
-// ── Local UI state ────────────────────────────────────────────────────────────
-// serverState mirrors what the backend holds; myAvailability is local until submit
-let serverState    = { submissions: [] };   // { submissions, schedule?, scheduleError? }
+// ── State ─────────────────────────────────────────────────────────────────────
+let serverState    = { submissions: [] };
 let myAvailability = new Set();
 let mySubmitted    = false;
 
-// ── Utilities ─────────────────────────────────────────────────────────────────
-const esc      = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const getName  = () => document.getElementById('myname').value.trim();
-const myRecord = () => serverState.submissions.find(s => s.name === getName());
-const isMine   = sub => sub.name === getName();
+// ── Utils ─────────────────────────────────────────────────────────────────────
+const esc     = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const getName = () => document.getElementById('myname').value.trim();
+const myRec   = () => serverState.submissions.find(s => s.name === getName());
 
-function showToast(msg, duration = 4000) {
+function showToast(msg, ms = 4500) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('visible');
-  setTimeout(() => t.classList.remove('visible'), duration);
+  setTimeout(() => t.classList.remove('visible'), ms);
 }
 
-// ── API calls ─────────────────────────────────────────────────────────────────
+function svgLink() {
+  return `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7 1h4m0 0v4m0-4L5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function svgArrow() {
+  return `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+// ── API ───────────────────────────────────────────────────────────────────────
 async function apiFetch(method, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
   if (body) opts.body = JSON.stringify(body);
@@ -578,7 +742,7 @@ async function loadState() {
     const data = await apiFetch('GET');
     serverState = data;
   } catch(e) {
-    showToast('Could not reach the server — showing local state only.');
+    showToast('Could not reach the server — showing local view only.');
   }
   document.getElementById('loading-bar').style.display = 'none';
   document.getElementById('main-content').style.display = 'block';
@@ -589,14 +753,13 @@ async function claimPaper(paperId, paperTitle) {
   const name = getName();
   if (!name) { showToast('Please enter your name first.'); return; }
 
-  // Optimistic UI update
+  // Optimistic
   serverState.submissions.push({ name, paperId, paperTitle, availability: [] });
   render();
 
   try {
     const data = await apiFetch('POST', { action: 'submit', name, paperId, paperTitle, availability: [] });
     if (!data.ok) {
-      // Roll back
       serverState.submissions = serverState.submissions.filter(s => !(s.name === name && s.paperId === paperId));
       render();
       showToast(data.error || 'Could not claim paper — please try again.');
@@ -614,36 +777,30 @@ async function claimPaper(paperId, paperTitle) {
 async function releasePaper() {
   const name = getName();
   myAvailability.clear();
-
-  // Optimistic
   serverState.submissions = serverState.submissions.filter(s => s.name !== name);
   render();
-
   try {
     const data = await apiFetch('POST', { action: 'release', name });
-    if (data.ok) serverState = data.state;
-    render();
+    if (data.ok) { serverState = data.state; render(); }
   } catch(e) {
     showToast('Network error when releasing — please refresh.');
   }
 }
 
 async function submitAvailability() {
-  const name = getName();
-  const rec  = myRecord();
+  const rec = myRec();
   if (!rec || myAvailability.size === 0) return;
 
+  const name = getName();
   const availability = [...myAvailability];
-  const btn  = document.getElementById('btn-submit');
+  const btn = document.getElementById('btn-submit');
   btn.disabled = true;
   btn.textContent = 'Submitting…';
 
   try {
     const data = await apiFetch('POST', {
-      action: 'submit',
-      name,
-      paperId:    rec.paperId,
-      paperTitle: rec.paperTitle,
+      action: 'submit', name,
+      paperId: rec.paperId, paperTitle: rec.paperTitle,
       availability,
     });
 
@@ -654,8 +811,8 @@ async function submitAvailability() {
       return;
     }
 
-    serverState  = data.state;
-    mySubmitted  = true;
+    serverState = data.state;
+    mySubmitted = true;
     btn.textContent = 'Submitted';
     render();
     showPostSubmitPanel();
@@ -667,64 +824,98 @@ async function submitAvailability() {
   }
 }
 
-function svgArrow() {
-  return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-}
-
 // ── Rendering ─────────────────────────────────────────────────────────────────
 function render() {
-  const name   = getName();
-  const rec    = myRecord();                          // my server record (if any)
-  const list   = document.getElementById('paper-list');
+  const name    = getName();
+  const rec     = myRec();
+  const list    = document.getElementById('paper-list');
   list.innerHTML = '';
 
   PAPERS.forEach((p, i) => {
-    const serverRec  = serverState.submissions.find(s => s.paperId === p.id);
-    const isMyClaim  = rec && rec.paperId === p.id;
-    const isTaken    = !!serverRec;
-    const canClaim   = !isTaken && name && !rec && !mySubmitted;
+    const serverRec = serverState.submissions.find(s => s.paperId === p.id);
+    const isMyClaim = rec && rec.paperId === p.id;
+    const isTaken   = !!serverRec;
+    const canClaim  = !isTaken && name && !rec && !mySubmitted;
 
     const card = document.createElement('div');
     card.className = 'paper-card' + (isMyClaim ? ' claimed-mine' : isTaken ? ' claimed-other' : '');
     card.style.animationDelay = (i * 0.04) + 's';
 
+    // Accent bar
     const bar = document.createElement('div');
     bar.className = 'paper-card-bar';
     card.appendChild(bar);
 
+    // Three-column inner
     const inner = document.createElement('div');
     inner.className = 'paper-inner';
 
-    const left = document.createElement('div');
-    left.innerHTML = `<div class="paper-title">${esc(p.title)}</div><div class="paper-tag">${esc(p.tag)}</div>`;
-
-    const presEl = document.createElement('div');
-    presEl.className = 'paper-presenter' + (isTaken ? '' : ' empty');
-    presEl.textContent = isTaken ? serverRec.name : 'unclaimed';
-    left.appendChild(presEl);
-
-    const actions = document.createElement('div');
-    actions.className = 'paper-actions';
+    // ── Left: claim/release button ──
+    const actionCol = document.createElement('div');
+    actionCol.className = 'paper-action-col';
 
     if (isMyClaim && !mySubmitted) {
       const btnR = document.createElement('button');
       btnR.className = 'btn-release';
       btnR.textContent = 'Release';
       btnR.onclick = releasePaper;
-      actions.appendChild(btnR);
+      actionCol.appendChild(btnR);
     } else if (canClaim) {
       const btnC = document.createElement('button');
       btnC.className = 'btn-claim';
       btnC.textContent = 'Claim';
       btnC.onclick = () => claimPaper(p.id, p.title);
-      actions.appendChild(btnC);
+      actionCol.appendChild(btnC);
+    } else if (!isTaken && !canClaim && name && rec && !mySubmitted) {
+      // Already claimed a different paper
+      const btnC = document.createElement('button');
+      btnC.className = 'btn-claim';
+      btnC.textContent = 'Claim';
+      btnC.disabled = true;
+      actionCol.appendChild(btnC);
     }
 
-    inner.appendChild(left);
-    inner.appendChild(actions);
+    // ── Middle: content ──
+    const content = document.createElement('div');
+    content.className = 'paper-content';
+
+    const absId = 'abs-signup-' + p.id;
+
+    content.innerHTML = `
+      <div class="paper-title">${esc(p.title)}</div>
+      <div class="paper-authors">${esc(p.authors)}</div>
+      <div class="paper-meta">
+        <span class="paper-venue ${p.venueClass}">${esc(p.venue)}</span>
+        <button class="paper-abstract-toggle" data-abs="${absId}">Abstract</button>
+      </div>
+      <div class="paper-abstract" id="${absId}">${esc(p.abstract)}</div>`;
+
+    if (isTaken) {
+      const tag = document.createElement('div');
+      tag.className = 'paper-presenter-tag';
+      tag.textContent = isMyClaim ? '↳ claimed by you' : '↳ ' + serverRec.name;
+      content.appendChild(tag);
+    }
+
+    // Abstract toggle
+    content.querySelector('.paper-abstract-toggle').addEventListener('click', function(e) {
+      e.stopPropagation();
+      const el = document.getElementById(this.dataset.abs);
+      el.classList.toggle('open');
+      this.textContent = el.classList.contains('open') ? 'Hide' : 'Abstract';
+    });
+
+    // ── Right: link ──
+    const linkCol = document.createElement('div');
+    linkCol.className = 'paper-link-col';
+    linkCol.innerHTML = `<a class="paper-link" href="${p.link}" target="_blank">${svgLink()} ${p.linkText}</a>`;
+
+    inner.appendChild(actionCol);
+    inner.appendChild(content);
+    inner.appendChild(linkCol);
     card.appendChild(inner);
 
-    // Availability picker — only for my claimed paper, before submit
+    // ── Availability picker (my paper only, before submit) ──
     if (isMyClaim && !mySubmitted) {
       const avail = document.createElement('div');
       avail.className = 'avail-section open';
@@ -734,18 +925,15 @@ function render() {
       lbl.textContent = 'Mark every Monday you are available to present';
       avail.appendChild(lbl);
 
-      const monthsWrap = document.createElement('div');
-      monthsWrap.className = 'avail-months';
+      const mWrap = document.createElement('div');
+      mWrap.className = 'avail-months';
 
       MONTHS.forEach(m => {
         const mg = document.createElement('div');
         mg.className = 'avail-month';
-        const mn = document.createElement('div');
-        mn.className = 'month-name';
-        mn.textContent = m.label;
-        mg.appendChild(mn);
-        const chipsWrap = document.createElement('div');
-        chipsWrap.className = 'date-chips';
+        mg.innerHTML = `<div class="month-name">${m.label}</div>`;
+        const chips = document.createElement('div');
+        chips.className = 'date-chips';
         m.dates.forEach(d => {
           const chip = document.createElement('div');
           chip.className = 'date-chip' + (myAvailability.has(d) ? ' on' : '');
@@ -757,13 +945,13 @@ function render() {
             updateCounter(p.id);
             updateSubmitBtn();
           };
-          chipsWrap.appendChild(chip);
+          chips.appendChild(chip);
         });
-        mg.appendChild(chipsWrap);
-        monthsWrap.appendChild(mg);
+        mg.appendChild(chips);
+        mWrap.appendChild(mg);
       });
 
-      avail.appendChild(monthsWrap);
+      avail.appendChild(mWrap);
 
       const counter = document.createElement('div');
       counter.className = 'avail-counter';
@@ -781,8 +969,7 @@ function render() {
   updateProgress();
   updateSubmitBtn();
 
-  // If schedule already exists (e.g. page loaded after all submitted), show it
-  if (serverState.schedule) showSchedule();
+  if (serverState.schedule)       showSchedule();
   else if (serverState.scheduleError) document.getElementById('panel-error').style.display = 'block';
 }
 
@@ -800,27 +987,27 @@ function updateProgress() {
 }
 
 function updateSubmitBtn() {
-  const rec  = myRecord();
+  const rec  = myRec();
   const btn  = document.getElementById('btn-submit');
   const note = document.getElementById('submit-note');
 
   if (mySubmitted) {
-    btn.disabled     = true;
+    btn.disabled = true;
     note.textContent = 'Your availability has been recorded.';
     return;
   }
   if (!rec) {
-    btn.disabled     = true;
+    btn.disabled = true;
     note.textContent = getName() ? 'Claim a paper to continue.' : 'Enter your name to get started.';
     return;
   }
   const n = myAvailability.size;
   if (n === 0) {
-    btn.disabled     = true;
+    btn.disabled = true;
     note.textContent = 'Mark at least one available date to proceed.';
     return;
   }
-  btn.disabled     = false;
+  btn.disabled = false;
   note.textContent = `Ready — ${n} date${n !== 1 ? 's' : ''} selected.`;
 }
 
@@ -828,8 +1015,9 @@ function showPostSubmitPanel() {
   if (serverState.schedule) {
     showSchedule();
   } else if (serverState.scheduleError) {
-    document.getElementById('panel-error').style.display = 'block';
-    document.getElementById('panel-error').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const el = document.getElementById('panel-error');
+    el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } else {
     const wp = document.getElementById('panel-waiting');
     wp.style.display = 'block';
@@ -862,7 +1050,6 @@ function showSchedule() {
   panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── Boot ──────────────────────────────────────────────────────────────────────
 document.getElementById('myname').addEventListener('input', render);
 loadState();
 </script>
